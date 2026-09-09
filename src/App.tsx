@@ -12,6 +12,7 @@ import {
   Settings,
   CheckCircle2,
   Home,
+  Heart,
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { StorageStatsBar } from './components/StorageStatsBar';
@@ -25,6 +26,9 @@ import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { UploadQueue } from './components/UploadQueue';
 import { StartupLoadingScreen } from './components/StartupLoadingScreen';
+import { PWAInstallModal } from './components/PWAInstallModal';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import {
   StorageItem,
   TelegramConfig,
@@ -79,6 +83,7 @@ export default function App() {
 
   // Modals state
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState<StorageItem | null>(null);
   const [renameItem, setRenameItem] = useState<StorageItem | null>(null);
@@ -480,10 +485,14 @@ export default function App() {
         totalFiles={stats?.totalFiles || 0}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        onOpenInstallModal={() => setIsInstallModalOpen(true)}
       />
 
-      {/* Main Container with bottom padding for mobile dock */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6">
+      {/* PWA Promotion & Quick Install Banner */}
+      <PWAInstallBanner onOpenInstallModal={() => setIsInstallModalOpen(true)} />
+
+      {/* Main Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
         {/* Storage Stats and Category Filters */}
         <StorageStatsBar
           stats={stats}
@@ -509,6 +518,7 @@ export default function App() {
           onDeleteItem={handleDeleteItem}
           onBulkMove={handleBulkMove}
           onBulkDelete={handleBulkDelete}
+          onConfirmMove={handleConfirmMove}
           onUploadFiles={handleUploadFiles}
           onOpenNewFolder={() => setIsNewFolderOpen(true)}
           viewMode={viewMode}
@@ -516,11 +526,22 @@ export default function App() {
         />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
-        <p>
-          TeleVault Cloud Storage • Files hosted securely on Telegram CDN with unmetered storage capacity
-        </p>
+      {/* Footer with bottom clearance for mobile dock */}
+      <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 py-4 pb-24 sm:pb-5 px-4 sm:px-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
+          <span>TeleVault Cloud Storage • Encrypted & Powered by Telegram CDN</span>
+          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">•</span>
+          <button
+            onClick={() => setIsInstallModalOpen(true)}
+            className="text-sky-600 dark:text-sky-400 font-semibold hover:underline cursor-pointer"
+          >
+            Install App (PC, Android, Mac, iOS)
+          </button>
+          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">•</span>
+          <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+            Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline-block animate-pulse" /> by <span className="font-semibold text-sky-600 dark:text-sky-400">Salman Sami</span>
+          </span>
+        </div>
       </footer>
 
       {/* Mobile Bottom Navigation Dock (sm:hidden) */}
@@ -641,6 +662,15 @@ export default function App() {
         onClose={() => setShareItem(null)}
         item={shareItem}
       />
+
+      {/* PWA Install & Multi-Platform Guide Modal */}
+      <PWAInstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+      />
+
+      {/* Connectivity & Offline Mode Indicator */}
+      <OfflineIndicator />
 
       {/* Animated First-Launch Startup Loading Screen */}
       {isInitialLoading && (

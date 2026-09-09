@@ -22,6 +22,7 @@ interface FileBrowserProps {
   onDeleteItem: (item: StorageItem) => void;
   onBulkMove?: (items: StorageItem[]) => void;
   onBulkDelete?: (items: StorageItem[]) => void;
+  onConfirmMove?: (itemIds: string[], targetFolderId: string | null) => Promise<void>;
   onUploadFiles: (files: FileList | File[]) => void;
   onOpenNewFolder: () => void;
   viewMode: ViewMode;
@@ -41,6 +42,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   onDeleteItem,
   onBulkMove,
   onBulkDelete,
+  onConfirmMove,
   onUploadFiles,
   onOpenNewFolder,
   viewMode,
@@ -49,7 +51,9 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   const [sortField, setSortField] = useState<SortField>('updatedAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [actionModalItem, setActionModalItem] = useState<StorageItem | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [isExternalDragOver, setIsExternalDragOver] = useState(false);
+  const [draggedItemIds, setDraggedItemIds] = useState<string[]>([]);
+  const [activeDropTargetId, setActiveDropTargetId] = useState<string | 'root' | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -133,23 +137,149 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
   const sortedFolders = sortItems(folders);
   const sortedFiles = sortItems(files);
 
-  // Drag & drop handling
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+  // ----------------------------------------------------
+  // Drag & Drop Handlers for Moving Files & Folders
+  // ----------------------------------------------------
+  const handleItemDragStart = (e: React.DragEvent, item: StorageItem) => {
     e.stopPropagation();
-    setIsDragOver(true);
+    // If the dragged item is already selected, drag all selected items; otherwise drag just this item
+    const idsToDrag = selectedIds.has(item.id)
+      ? Array.from(selectedIds)
+      : [item.id];
+
+    setDraggedItemIds(idsToDrag);
+    e.dataTransfer.setData('text/plain', JSON.stringify({ itemIds: idsToDrag }));
+    e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleItemDragEnd = (e: React.DragEvent) => {
     e.stopPropagation();
-    setIsDragOver(false);
+    setDraggedItemIds([]);
+    setActiveDropTargetId(null);
+    setIsExternalDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleFolderDragOver = (e: React.DragEvent, targetFolderId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragOver(false);
+
+    // Prevent dropping a folder into itself or into an item currently being dragged
+    if (draggedItemIds.includes(targetFolderId)) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+    if (activeDropTargetId !== targetFolderId) {
+      setActiveDropTargetId(targetFolderId);
+    }
+  };
+
+  const handleFolderDragLeave = (e: React.DragEvent, targetFolderId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (activeDropTargetId === targetFolderId) {
+      setActiveDropTargetId(null);
+    }
+  };
+
+  const handleBreadcrumbDragOver = (e: React.DragEvent, targetId: string | 'root') => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedItemIds.length === 0) return;
+
+    if (targetId === 'root') {
+      if (currentFolderId !== null) {
+        e.dataTransfer.dropEffect = 'move';
+        if (activeDropTargetId !== 'root') setActiveDropTargetId('root');
+      }
+    } else {
+      if (targetId !== currentFolderId && !draggedItemIds.includes(targetId)) {
+        e.dataTransfer.dropEffect = 'move';
+        if (activeDropTargetId !== targetId) setActiveDropTargetId(targetId);
+      }
+    }
+  };
+
+  const handleBreadcrumbDragLeave = (e: React.DragEvent, targetId: string | 'root') => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (activeDropTargetId === targetId) {
+      setActiveDropTargetId(null);
+    }
+  };
+
+  const handleDropOnTarget = async (e: React.DragEvent, targetFolderId: string | null) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDropTargetId(null);
+
+    // If external OS files were dropped onto a folder or breadcrumb
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && draggedItemIds.length === 0) {
+      onUploadFiles(e.dataTransfer.files);
+      return;
+    }
+
+    // Internal item moving
+    let idsToMove = draggedItemIds;
+    if (idsToMove.length === 0) {
+      try {
+        const text = e.dataTransfer.getData('text/plain');
+        if (text) {
+          const parsed = JSON.parse(text);
+          if (parsed?.itemIds) idsToMove = parsed.itemIds;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (idsToMove.length > 0 && onConfirmMove) {
+      // Exclude invalid targets (cannot drop folder into itself)
+      const validIds = idsToMove.filter((id) => id !== targetFolderId);
+      if (validIds.length > 0) {
+        await onConfirmMove(validIds, targetFolderId);
+        clearSelection();
+      }
+    }
+
+    setDraggedItemIds([]);
+  };
+
+  // External Files Drag & Drop Handlers for Container
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    // If internal items are being dragged, don't show the full container upload overlay
+    if (draggedItemIds.length > 0) {
+      e.preventDefault();
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExternalDragOver(true);
+  };
+
+  const handleContainerDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget === e.target) {
+      setIsExternalDragOver(false);
+    }
+  };
+
+  const handleContainerDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExternalDragOver(false);
+
+    if (draggedItemIds.length > 0) {
+      // Dropped on empty canvas space - cancel drag
+      setDraggedItemIds([]);
+      setActiveDropTargetId(null);
+      return;
+    }
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       onUploadFiles(e.dataTransfer.files);
     }
@@ -177,13 +307,15 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
     }
   };
 
+  const isDraggingItems = draggedItemIds.length > 0;
+
   return (
     <div
       id="file-browser-container"
       onClick={handleContainerClick}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onDragOver={handleContainerDragOver}
+      onDragLeave={handleContainerDragLeave}
+      onDrop={handleContainerDrop}
       className="relative min-h-[500px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col transition-colors"
     >
       {/* Hidden file input */}
@@ -199,9 +331,9 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         }}
       />
 
-      {/* Drag & Drop Overlay */}
-      {isDragOver && (
-        <div className="absolute inset-0 z-30 bg-sky-500/10 dark:bg-sky-950/40 backdrop-blur-xs border-2 border-dashed border-sky-500 dark:border-sky-400 rounded-2xl flex flex-col items-center justify-center p-6 text-sky-800 dark:text-sky-200 animate-in fade-in duration-100">
+      {/* OS Files Drag & Drop Upload Overlay */}
+      {isExternalDragOver && !isDraggingItems && (
+        <div className="absolute inset-0 z-30 bg-sky-500/10 dark:bg-sky-950/40 backdrop-blur-xs border-2 border-dashed border-sky-500 dark:border-sky-400 rounded-2xl flex flex-col items-center justify-center p-6 text-sky-800 dark:text-sky-200 animate-in fade-in duration-100 pointer-events-none">
           <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 shadow-lg flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3">
             <Upload className="w-8 h-8 animate-bounce" />
           </div>
@@ -210,36 +342,66 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
         </div>
       )}
 
+      {/* Dragging Internal Items Floating Notice */}
+      {isDraggingItems && (
+        <div className="sticky top-0 z-40 bg-sky-600 dark:bg-sky-500 text-white px-4 py-2 text-xs font-semibold shadow-md flex items-center justify-between animate-in slide-in-from-top-1 duration-150 rounded-t-2xl">
+          <div className="flex items-center gap-2">
+            <FolderSymlink className="w-4 h-4 animate-pulse" />
+            <span>
+              Moving <strong className="underline">{draggedItemIds.length}</strong> item{draggedItemIds.length === 1 ? '' : 's'} • Drag & drop onto any folder or breadcrumb to move
+            </span>
+          </div>
+          <span className="text-[10px] bg-sky-700/80 dark:bg-sky-600/80 px-2 py-0.5 rounded-full font-mono">
+            Drop Target Active
+          </span>
+        </div>
+      )}
+
       {/* Top Toolbar */}
       <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-slate-50/40 dark:bg-slate-900/60 rounded-t-2xl max-w-full overflow-hidden">
-        {/* Breadcrumb Navigation */}
+        {/* Breadcrumb Navigation - acts as drag drop target too! */}
         <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 overflow-x-auto scrollbar-none py-0.5 w-full min-w-0 max-w-full touch-pan-x">
           <button
             id="breadcrumb-root-btn"
             onClick={() => onNavigateFolder(null)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors shrink-0 cursor-pointer ${
-              currentFolderId === null
+            onDragOver={(e) => handleBreadcrumbDragOver(e, 'root')}
+            onDragLeave={(e) => handleBreadcrumbDragLeave(e, 'root')}
+            onDrop={(e) => handleDropOnTarget(e, null)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all shrink-0 cursor-pointer ${
+              activeDropTargetId === 'root'
+                ? 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 ring-2 ring-sky-500 scale-105 shadow-xs font-bold'
+                : currentFolderId === null
                 ? 'font-semibold text-slate-900 dark:text-white bg-white dark:bg-slate-800 shadow-xs border border-slate-200/80 dark:border-slate-700'
                 : 'hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
             }`}
+            title={isDraggingItems ? 'Drop here to move to Root Drive' : 'Navigate to Root Drive'}
           >
             <Home className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Root Drive</span>
+            {activeDropTargetId === 'root' && (
+              <span className="text-[10px] bg-sky-600 text-white px-1.5 py-0.2 rounded-full font-bold ml-1">Drop</span>
+            )}
           </button>
 
           {folderPath.map((f, idx) => {
             const isLast = idx === folderPath.length - 1;
+            const isTarget = activeDropTargetId === f.id;
             return (
               <React.Fragment key={f.id}>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600 shrink-0" />
                 <button
                   onClick={() => onNavigateFolder(f.id)}
-                  className={`px-2 py-1 rounded-lg transition-colors truncate max-w-[120px] sm:max-w-[140px] shrink-0 cursor-pointer ${
-                    isLast
+                  onDragOver={(e) => handleBreadcrumbDragOver(e, f.id)}
+                  onDragLeave={(e) => handleBreadcrumbDragLeave(e, f.id)}
+                  onDrop={(e) => handleDropOnTarget(e, f.id)}
+                  className={`px-2 py-1 rounded-lg transition-all truncate max-w-[120px] sm:max-w-[140px] shrink-0 cursor-pointer ${
+                    isTarget
+                      ? 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 ring-2 ring-sky-500 scale-105 shadow-xs font-bold'
+                      : isLast
                       ? 'font-semibold text-slate-900 dark:text-white bg-white dark:bg-slate-800 shadow-xs border border-slate-200/80 dark:border-slate-700'
                       : 'hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}
-                  title={f.name}
+                  title={isDraggingItems ? `Drop here to move into ${f.name}` : f.name}
                 >
                   {f.name}
                 </button>
@@ -429,12 +591,25 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
                   {sortedFolders.map((folder) => {
                     const isSelected = selectedIds.has(folder.id);
+                    const isBeingDragged = draggedItemIds.includes(folder.id);
+                    const isTarget = activeDropTargetId === folder.id;
+
                     return (
                       <div
                         key={folder.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, folder)}
+                        onDragEnd={handleItemDragEnd}
+                        onDragOver={(e) => handleFolderDragOver(e, folder.id)}
+                        onDragLeave={(e) => handleFolderDragLeave(e, folder.id)}
+                        onDrop={(e) => handleDropOnTarget(e, folder.id)}
                         onDoubleClick={() => onNavigateFolder(folder.id)}
                         className={`group relative border rounded-xl p-3 flex items-center justify-between cursor-pointer transition-all ${
-                          isSelected
+                          isTarget
+                            ? 'bg-sky-100/95 dark:bg-sky-950/90 border-sky-500 dark:border-sky-400 ring-2 ring-sky-500 shadow-md scale-[1.03]'
+                            : isBeingDragged
+                            ? 'opacity-40 border-dashed border-sky-400 bg-sky-50/50 dark:bg-slate-800/40'
+                            : isSelected
                             ? 'bg-sky-50/90 dark:bg-sky-950/60 border-sky-400 dark:border-sky-600 ring-2 ring-sky-500/80 shadow-xs'
                             : 'bg-slate-50/70 dark:bg-slate-800/80 hover:bg-sky-50/60 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-750 hover:border-sky-300 dark:hover:border-sky-500/50'
                         }`}
@@ -458,10 +633,17 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                           onClick={() => onNavigateFolder(folder.id)}
                           className="flex items-center gap-2 min-w-0 flex-1 select-none"
                         >
-                          <Folder className="w-5 h-5 text-amber-500 fill-amber-500/20 shrink-0" />
-                          <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate" title={folder.name}>
-                            {folder.name}
-                          </span>
+                          <Folder className={`w-5 h-5 shrink-0 ${isTarget ? 'text-sky-600 fill-sky-500/30' : 'text-amber-500 fill-amber-500/20'}`} />
+                          <div className="min-w-0 flex-1">
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate block" title={folder.name}>
+                              {folder.name}
+                            </span>
+                            {isTarget && (
+                              <span className="text-[10px] text-sky-600 dark:text-sky-400 font-bold block animate-pulse">
+                                Drop to move inside
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* 3-Dots Menu Trigger */}
@@ -491,12 +673,15 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Files ({sortedFiles.length})
                   </h4>
-                  <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500">Double click to preview</span>
+                  <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500">
+                    {isDraggingItems ? 'Drag onto any folder to move' : 'Double click to preview • Drag to move'}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3.5">
                   {sortedFiles.map((file) => {
                     const isSelected = selectedIds.has(file.id);
+                    const isBeingDragged = draggedItemIds.includes(file.id);
                     const category = getFileCategory(file.mimeType, file.extension);
                     const isImage = category === 'image';
                     const streamUrl = `/api/files/${file.id}/stream`;
@@ -504,9 +689,14 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                     return (
                       <div
                         key={file.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, file)}
+                        onDragEnd={handleItemDragEnd}
                         onDoubleClick={() => onPreviewFile(file)}
                         className={`group relative bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-800 border rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col cursor-pointer ${
-                          isSelected
+                          isBeingDragged
+                            ? 'opacity-40 border-dashed border-sky-400 bg-sky-50/50 dark:bg-slate-800/40'
+                            : isSelected
                             ? 'border-sky-400 dark:border-sky-500 ring-2 ring-sky-500/80 shadow-xs'
                             : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
@@ -598,12 +788,25 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   </h4>
                   {sortedFolders.map((folder) => {
                     const isSelected = selectedIds.has(folder.id);
+                    const isBeingDragged = draggedItemIds.includes(folder.id);
+                    const isTarget = activeDropTargetId === folder.id;
+
                     return (
                       <div
                         key={folder.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, folder)}
+                        onDragEnd={handleItemDragEnd}
+                        onDragOver={(e) => handleFolderDragOver(e, folder.id)}
+                        onDragLeave={(e) => handleFolderDragLeave(e, folder.id)}
+                        onDrop={(e) => handleDropOnTarget(e, folder.id)}
                         onClick={() => onNavigateFolder(folder.id)}
-                        className={`border rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2.5 active:bg-slate-50 dark:active:bg-slate-800 transition-colors shadow-2xs cursor-pointer ${
-                          isSelected
+                        className={`border rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2.5 active:bg-slate-50 dark:active:bg-slate-800 transition-all shadow-2xs cursor-pointer ${
+                          isTarget
+                            ? 'bg-sky-100/95 dark:bg-sky-950/90 border-sky-500 ring-2 ring-sky-500 shadow-md scale-[1.01]'
+                            : isBeingDragged
+                            ? 'opacity-40 border-dashed border-sky-400 bg-sky-50/50'
+                            : isSelected
                             ? 'bg-sky-50/90 dark:bg-sky-950/60 border-sky-400 dark:border-sky-600 ring-1 ring-sky-500'
                             : 'bg-white dark:bg-slate-800/90 border-slate-200/90 dark:border-slate-700/80'
                         }`}
@@ -624,15 +827,27 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                         </div>
 
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/60 dark:border-amber-800/60 flex items-center justify-center shrink-0">
-                            <Folder className="w-5 h-5 text-amber-500 fill-amber-500/20" />
+                          <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${
+                            isTarget
+                              ? 'bg-sky-100 dark:bg-sky-900 border-sky-400 text-sky-600'
+                              : 'bg-amber-50 dark:bg-amber-950/50 border-amber-200/60 dark:border-amber-800/60'
+                          }`}>
+                            <Folder className={`w-5 h-5 ${isTarget ? 'text-sky-600 fill-sky-500/20' : 'text-amber-500 fill-amber-500/20'}`} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">{folder.name}</div>
                             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                              <span className="text-amber-700 dark:text-amber-400 font-medium">Folder</span>
-                              <span>•</span>
-                              <span>{formatDate(folder.updatedAt)}</span>
+                              {isTarget ? (
+                                <span className="text-sky-600 dark:text-sky-400 font-bold animate-pulse">
+                                  Drop here to move inside
+                                </span>
+                              ) : (
+                                <>
+                                  <span className="text-amber-700 dark:text-amber-400 font-medium">Folder</span>
+                                  <span>•</span>
+                                  <span>{formatDate(folder.updatedAt)}</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -663,12 +878,19 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   </h4>
                   {sortedFiles.map((file) => {
                     const isSelected = selectedIds.has(file.id);
+                    const isBeingDragged = draggedItemIds.includes(file.id);
+
                     return (
                       <div
                         key={file.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, file)}
+                        onDragEnd={handleItemDragEnd}
                         onClick={() => onPreviewFile(file)}
-                        className={`border rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2.5 active:bg-slate-50 dark:active:bg-slate-800 transition-colors shadow-2xs cursor-pointer ${
-                          isSelected
+                        className={`border rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2.5 active:bg-slate-50 dark:active:bg-slate-800 transition-all shadow-2xs cursor-pointer ${
+                          isBeingDragged
+                            ? 'opacity-40 border-dashed border-sky-400 bg-sky-50/50'
+                            : isSelected
                             ? 'bg-sky-50/90 dark:bg-sky-950/60 border-sky-400 dark:border-sky-600 ring-1 ring-sky-500'
                             : 'bg-white dark:bg-slate-800/90 border-slate-200/90 dark:border-slate-700/80'
                         }`}
@@ -751,12 +973,27 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   {/* Folders Rows in Desktop Table */}
                   {sortedFolders.map((folder) => {
                     const isSelected = selectedIds.has(folder.id);
+                    const isBeingDragged = draggedItemIds.includes(folder.id);
+                    const isTarget = activeDropTargetId === folder.id;
+
                     return (
                       <tr
                         key={folder.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, folder)}
+                        onDragEnd={handleItemDragEnd}
+                        onDragOver={(e) => handleFolderDragOver(e, folder.id)}
+                        onDragLeave={(e) => handleFolderDragLeave(e, folder.id)}
+                        onDrop={(e) => handleDropOnTarget(e, folder.id)}
                         onDoubleClick={() => onNavigateFolder(folder.id)}
-                        className={`transition-colors group cursor-pointer ${
-                          isSelected ? 'bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-50 dark:hover:bg-sky-950/60' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/60'
+                        className={`transition-all group cursor-pointer ${
+                          isTarget
+                            ? 'bg-sky-100/95 dark:bg-sky-950/80 ring-2 ring-sky-500 shadow-xs font-semibold'
+                            : isBeingDragged
+                            ? 'opacity-40 bg-slate-100/60 dark:bg-slate-800/40'
+                            : isSelected
+                            ? 'bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-50 dark:hover:bg-sky-950/60'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/60'
                         }`}
                       >
                         <td
@@ -775,10 +1012,15 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                           onClick={() => onNavigateFolder(folder.id)}
                           className="px-4 py-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2.5"
                         >
-                          <Folder className="w-5 h-5 text-amber-500 fill-amber-500/20 shrink-0" />
+                          <Folder className={`w-5 h-5 shrink-0 ${isTarget ? 'text-sky-600 fill-sky-500/30' : 'text-amber-500 fill-amber-500/20'}`} />
                           <span className="truncate max-w-xs sm:max-w-md" title={folder.name}>
                             {folder.name}
                           </span>
+                          {isTarget && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-bold shadow-xs ml-2 animate-bounce">
+                              <FolderSymlink className="w-2.5 h-2.5" /> Drop to Move
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-slate-400 dark:text-slate-500">—</td>
                         <td className="px-4 py-3">
@@ -854,12 +1096,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   {/* Files Rows in Desktop Table */}
                   {sortedFiles.map((file) => {
                     const isSelected = selectedIds.has(file.id);
+                    const isBeingDragged = draggedItemIds.includes(file.id);
+
                     return (
                       <tr
                         key={file.id}
+                        draggable={true}
+                        onDragStart={(e) => handleItemDragStart(e, file)}
+                        onDragEnd={handleItemDragEnd}
                         onDoubleClick={() => onPreviewFile(file)}
-                        className={`transition-colors group cursor-pointer ${
-                          isSelected ? 'bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-50 dark:hover:bg-sky-950/60' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/60'
+                        className={`transition-all group cursor-pointer ${
+                          isBeingDragged
+                            ? 'opacity-40 bg-slate-100/60 dark:bg-slate-800/40'
+                            : isSelected
+                            ? 'bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-50 dark:hover:bg-sky-950/60'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/60'
                         }`}
                       >
                         <td
