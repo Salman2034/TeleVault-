@@ -588,7 +588,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
                   Folders ({sortedFolders.length})
                 </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2.5 sm:gap-3">
                   {sortedFolders.map((folder) => {
                     const isSelected = selectedIds.has(folder.id);
                     const isBeingDragged = draggedItemIds.includes(folder.id);
@@ -673,12 +673,12 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Files ({sortedFiles.length})
                   </h4>
-                  <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500">
+                  <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500 hidden sm:inline">
                     {isDraggingItems ? 'Drag onto any folder to move' : 'Double click to preview • Drag to move'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 sm:gap-3.5">
                   {sortedFiles.map((file) => {
                     const isSelected = selectedIds.has(file.id);
                     const isBeingDragged = draggedItemIds.includes(file.id);
@@ -962,11 +962,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                         title="Select all"
                       />
                     </th>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Size</th>
-                    <th className="px-4 py-3">Type / Host</th>
-                    <th className="px-4 py-3">Date Modified</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-3 sm:px-4 py-3">Name</th>
+                    <th className="px-2 sm:px-4 py-3">Size</th>
+                    <th className="px-3 py-3 hidden md:table-cell">Type / Host</th>
+                    <th className="px-3 py-3 hidden lg:table-cell">Date Modified</th>
+                    <th className="px-3 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1010,10 +1010,10 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                         </td>
                         <td 
                           onClick={() => onNavigateFolder(folder.id)}
-                          className="px-4 py-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2.5"
+                          className="px-3 sm:px-4 py-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2.5 min-w-0"
                         >
                           <Folder className={`w-5 h-5 shrink-0 ${isTarget ? 'text-sky-600 fill-sky-500/30' : 'text-amber-500 fill-amber-500/20'}`} />
-                          <span className="truncate max-w-xs sm:max-w-md" title={folder.name}>
+                          <span className="truncate max-w-[160px] sm:max-w-xs md:max-w-sm lg:max-w-md" title={folder.name}>
                             {folder.name}
                           </span>
                           {isTarget && (
@@ -1022,14 +1022,14 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-400 dark:text-slate-500">—</td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3 text-slate-400 dark:text-slate-500">—</td>
+                        <td className="px-3 py-3 hidden md:table-cell">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 text-[10px] font-semibold border border-amber-200/60 dark:border-amber-800/60">
                             <Folder className="w-2.5 h-2.5" /> Folder
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-400 dark:text-slate-500">{formatDate(folder.updatedAt)}</td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-3 py-3 hidden lg:table-cell text-slate-400 dark:text-slate-500">{formatDate(folder.updatedAt)}</td>
+                        <td className="px-3 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               type="button"
@@ -1048,7 +1048,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onMoveItem(folder);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
                               title="Move Folder"
                             >
                               <FolderSymlink className="w-3.5 h-3.5" />
@@ -1059,7 +1059,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onRenameItem(folder);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
                               title="Rename Folder"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -1070,7 +1070,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onDeleteItem(folder);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg cursor-pointer"
                               title="Delete Folder"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1127,21 +1127,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                         </td>
                         <td 
                           onClick={() => onPreviewFile(file)}
-                          className="px-4 py-3 font-medium text-slate-900 dark:text-white flex items-center gap-2.5"
+                          className="px-3 sm:px-4 py-3 font-medium text-slate-900 dark:text-white flex items-center gap-2.5 min-w-0"
                         >
                           {renderFileIcon(file)}
-                          <span className="truncate max-w-xs sm:max-w-md font-semibold" title={file.name}>
+                          <span className="truncate max-w-[160px] sm:max-w-xs md:max-w-sm lg:max-w-md font-semibold" title={file.name}>
                             {file.name}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{formatBytes(file.size)}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3 text-slate-500 dark:text-slate-400">{formatBytes(file.size)}</td>
+                        <td className="px-3 py-3 hidden md:table-cell">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 text-[10px] font-medium border border-sky-200/60 dark:border-sky-800/60">
                             <Send className="w-2.5 h-2.5 -rotate-12" /> Telegram CDN
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-slate-400 dark:text-slate-500">{formatDate(file.createdAt)}</td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-3 py-3 hidden lg:table-cell text-slate-400 dark:text-slate-500">{formatDate(file.createdAt)}</td>
+                        <td className="px-3 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               type="button"
@@ -1171,7 +1171,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onShareFile(file);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
                               title="Share"
                             >
                               <Share2 className="w-3.5 h-3.5" />
@@ -1182,7 +1182,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onMoveItem(file);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
                               title="Move"
                             >
                               <FolderSymlink className="w-3.5 h-3.5" />
@@ -1193,7 +1193,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({
                                 e.stopPropagation();
                                 onDeleteItem(file);
                               }}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg cursor-pointer"
+                              className="hidden xl:inline-flex p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
