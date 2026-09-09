@@ -1,0 +1,6 @@
+{
+  "name": "Telegram Cloud Storage",
+  "description": "Cloud storage web application leveraging Telegram as free, unlimited file hosting with MTProto support up to 2GB, folder management, and media streaming.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

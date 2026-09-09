@@ -1,0 +1,55 @@
+[
+  {
+    "id": "folder-documents",
+    "name": "Documents",
+    "type": "folder",
+    "size": 0,
+    "parentId": null,
+    "createdAt": "2026-09-09T02:27:12.451Z",
+    "updatedAt": "2026-09-09T02:27:12.451Z"
+  },
+  {
+    "id": "folder-photos",
+    "name": "Photos & Wallpapers",
+    "type": "folder",
+    "size": 0,
+    "parentId": null,
+    "createdAt": "2026-09-09T02:27:12.451Z",
+    "updatedAt": "2026-09-09T02:27:12.451Z"
+  },
+  {
+    "id": "folder-notes",
+    "name": "Work & Projects",
+    "type": "folder",
+    "size": 0,
+    "parentId": null,
+    "createdAt": "2026-09-09T02:27:12.451Z",
+    "updatedAt": "2026-09-09T02:27:12.451Z"
+  },
+  {
+    "id": "file-guide-pdf",
+    "name": "Telegram_Storage_Guide.txt",
+    "type": "file",
+    "size": 1450,
+    "mimeType": "text/plain",
+    "extension": "txt",
+    "parentId": "folder-documents",
+    "createdAt": "2026-09-09T02:27:12.451Z",
+    "updatedAt": "2026-09-09T02:27:12.451Z",
+    "isDemo": true,
+    "demoContent": "=====================================================\nTELEGRAM AS UNLIMITED CLOUD HOSTING - 2GB MTPROTO GUIDE\n=====================================================\n\nWelcome to Telegram Cloud Storage!\n\nTelegram provides free, unmetered storage for files:\n1. Every file uploaded through this webapp is dispatched directly to your Telegram Channel.\n2. Standard HTTP Bot API has a 50 MB file limit.\n3. WITH MTPROTO PROTOCOL CLIENT (GramJS):\n   - Upload files up to 2 GB (2,048 MB) per file!\n   - Standard user account limits applied to your bot via MTProto binary protocol.\n   - Stream movies, audio, and large datasets in parallel chunks directly from Telegram's CDN.\n\nHOW TO ACTIVATE 2 GB MTPROTO PROTOCOL:\n1. Open https://my.telegram.org and log in with your phone.\n2. Click 'API development tools'.\n3. Copy your 'App api_id' and 'App api_hash'.\n4. In this app's Telegram Settings, select 'MTProto Client (2 GB Limit)' and save your API ID, API Hash, Bot Token, and Channel ID.\n\nEnjoy your private, permanent, 2GB-capable cloud drive!"
+  },
+  {
+    "id": "file-sample-architecture",
+    "name": "Cloud_Architecture.json",
+    "type": "file",
+    "size": 680,
+    "mimeType": "application/json",
+    "extension": "json",
+    "parentId": "folder-notes",
+    "createdAt": "2026-09-09T02:27:12.451Z",
+    "updatedAt": "2026-09-09T02:27:12.451Z",
+    "isDemo": true,
+    "demoContent": "{\n  \"appName\": \"Telegram Cloud Storage\",\n  \"backend\": \"Node.js Express Proxy\",\n  \"storageProvider\": \"Telegram Bot API / CDN\",\n  \"features\": [\n    \"Unlimited free file hosting\",\n    \"Streaming media player\",\n    \"Virtual folder hierarchy\",\n    \"Direct downloads and sharing\"\n  ],\n  \"security\": \"Private channel access with Bot API keys\"\n}"
+  }
+]
