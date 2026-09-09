@@ -35,6 +35,31 @@ import {
 } from './types';
 
 export default function App() {
+  // Theme state with local persistence
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('televault_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('televault_theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   // Loading & Splash state
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isDataReady, setIsDataReady] = useState(false);
@@ -427,12 +452,12 @@ export default function App() {
   const currentFolderName = folderPath.length > 0 ? folderPath[folderPath.length - 1].name : 'Root Drive';
 
   return (
-    <div className="min-h-screen bg-slate-100/60 text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-slate-100/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white transition-colors duration-200">
       {/* Toast Notification for Sync & Success */}
       {syncFeedback && (
         <div
           id="sync-feedback-toast"
-          className="fixed top-20 right-4 sm:right-6 z-50 bg-slate-900/95 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5 border border-slate-700 animate-in slide-in-from-top duration-200"
+          className="fixed top-20 right-4 sm:right-6 z-50 bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2.5 border border-slate-700 dark:border-slate-600 animate-in slide-in-from-top duration-200"
         >
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{syncFeedback}</span>
@@ -453,6 +478,8 @@ export default function App() {
         onSyncTelegram={handleSyncTelegram}
         isSyncing={isSyncing}
         totalFiles={stats?.totalFiles || 0}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       {/* Main Container with bottom padding for mobile dock */}
@@ -490,22 +517,22 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/80 bg-white py-4 px-6 text-center text-xs text-slate-500 hidden sm:block">
+      <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
         <p>
-          Telegram Cloud Storage • Files hosted on Telegram CDN with unmetered storage capacity
+          TeleVault Cloud Storage • Files hosted securely on Telegram CDN with unmetered storage capacity
         </p>
       </footer>
 
       {/* Mobile Bottom Navigation Dock (sm:hidden) */}
       <nav
         id="mobile-bottom-nav-dock"
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 flex items-center justify-around shadow-lg"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-lg"
       >
         {/* Root Drive */}
         <button
           onClick={() => setCurrentFolderId(null)}
           className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium transition-colors ${
-            currentFolderId === null ? 'text-sky-600' : 'text-slate-500 hover:text-slate-900'
+            currentFolderId === null ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <Home className="w-5 h-5" />
@@ -515,7 +542,7 @@ export default function App() {
         {/* New Folder */}
         <button
           onClick={() => setIsNewFolderOpen(true)}
-          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 hover:text-slate-900 transition-colors"
+          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <FolderPlus className="w-5 h-5" />
           <span>Folder</span>
@@ -527,7 +554,7 @@ export default function App() {
             const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
             if (fileInput) fileInput.click();
           }}
-          className="w-12 h-12 -mt-5 rounded-full bg-sky-600 text-white shadow-lg shadow-sky-500/30 flex items-center justify-center active:scale-95 transition-all"
+          className="w-12 h-12 -mt-5 rounded-full bg-sky-600 dark:bg-sky-500 text-white shadow-lg shadow-sky-500/30 flex items-center justify-center active:scale-95 transition-all"
           aria-label="Upload file"
         >
           <Upload className="w-6 h-6" />
@@ -537,16 +564,16 @@ export default function App() {
         <button
           onClick={handleSyncTelegram}
           disabled={isSyncing}
-          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-50"
+          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors disabled:opacity-50"
         >
-          <RefreshCw className={`w-5 h-5 text-sky-600 ${isSyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-5 h-5 text-sky-600 dark:text-sky-400 ${isSyncing ? 'animate-spin' : ''}`} />
           <span>Sync</span>
         </button>
 
         {/* Settings */}
         <button
           onClick={() => setIsConfigOpen(true)}
-          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 hover:text-slate-900 transition-colors"
+          className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl text-[10px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <Settings className="w-5 h-5" />
           <span>Config</span>

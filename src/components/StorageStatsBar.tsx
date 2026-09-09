@@ -45,21 +45,21 @@ export const StorageStatsBar: React.FC<StorageStatsBarProps> = ({
   ];
 
   return (
-    <div id="storage-stats-container" className="space-y-4">
+    <div id="storage-stats-container" className="space-y-4 w-full max-w-full overflow-hidden">
       {/* Banner / Telegram Status Bar */}
       <div
-        className={`rounded-2xl p-4 sm:p-5 border transition-all ${
+        className={`rounded-2xl p-3.5 sm:p-5 border transition-all overflow-hidden ${
           isLive
             ? isMTProto
-              ? 'bg-gradient-to-r from-sky-50 via-indigo-50/50 to-emerald-50/40 border-sky-300/80 shadow-xs'
-              : 'bg-gradient-to-r from-sky-50 via-cyan-50/60 to-slate-50 border-sky-200/80'
-            : 'bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-slate-50 border-amber-200/80'
+              ? 'bg-gradient-to-r from-sky-50 via-indigo-50/50 to-emerald-50/40 dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border-sky-300/80 dark:border-indigo-800/60 shadow-xs'
+              : 'bg-gradient-to-r from-sky-50 via-cyan-50/60 to-slate-50 dark:from-slate-900 dark:via-sky-950/40 dark:to-slate-900 border-sky-200/80 dark:border-slate-800'
+            : 'bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-slate-50 dark:from-slate-900 dark:via-amber-950/30 dark:to-slate-900 border-amber-200/80 dark:border-amber-900/50'
         }`}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start sm:items-center gap-3">
+          <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                 isLive
                   ? isMTProto
                     ? 'bg-gradient-to-tr from-sky-600 to-indigo-600 text-white'
@@ -67,46 +67,46 @@ export const StorageStatsBar: React.FC<StorageStatsBarProps> = ({
                   : 'bg-amber-500 text-white'
               }`}
             >
-              {isMTProto ? <Zap className="w-5 h-5 text-white" /> : <Send className="w-5 h-5 -rotate-12" />}
+              {isMTProto ? <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" /> : <Send className="w-4 h-4 sm:w-5 sm:h-5 -rotate-12" />}
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-slate-900 text-sm">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
                   {isLive
                     ? isMTProto
-                      ? 'Telegram MTProto Cloud: Active'
-                      : 'Telegram Bot API Storage: Active'
+                      ? 'Telegram MTProto: Active'
+                      : 'Telegram Bot API: Active'
                     : 'Sandbox Storage Mode'}
                 </h3>
                 {isLive && isMTProto && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-900 border border-indigo-200/60">
-                    <Zap className="w-3 h-3 text-indigo-600" />
-                    2 GB Max File Size
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
+                    <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-indigo-600 dark:text-indigo-400" />
+                    2 GB Max
                   </span>
                 )}
                 <span
-                  className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${
-                    isLive ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold rounded-full ${
+                    isLive ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-transparent dark:border-emerald-800/60' : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-transparent dark:border-amber-800/60'
                   }`}
                 >
-                  {isLive ? 'Unlimited Free Hosting' : 'Local Sandbox'}
+                  {isLive ? 'Unlimited Free' : 'Local Sandbox'}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed break-words">
                 {isLive ? (
                   <span>
-                    Files stream to/from Telegram CDN via <strong>@{telegramConfig?.botUsername || 'your_bot'}</strong> in{' '}
-                    <strong>{telegramConfig?.chatTitle || telegramConfig?.chatId}</strong>
-                    {isMTProto ? ' using MTProto 2 GB chunked pipeline.' : ' (capped at 50 MB per file).'}
+                    Files stream to Telegram CDN via <strong className="text-slate-800 dark:text-slate-200">@{telegramConfig?.botUsername || 'your_bot'}</strong> in{' '}
+                    <strong className="text-slate-800 dark:text-slate-200">{telegramConfig?.chatTitle || telegramConfig?.chatId}</strong>
+                    {isMTProto ? ' (MTProto 2 GB pipeline).' : ' (max 50 MB/file).'}
                     {telegramConfig?.lastSyncTime && (
-                      <span className="block text-[11px] text-emerald-700 mt-0.5 font-medium">
-                        ✓ Cross-device synchronized with channel (Manifest updated)
+                      <span className="block text-[10px] sm:text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
+                        ✓ Cross-device synchronized
                       </span>
                     )}
                   </span>
                 ) : (
                   <span>
-                    Uploads are stored locally in sandbox mode. Connect your Telegram MTProto credentials to upload files up to 2 GB for free!
+                    Uploads are saved in local sandbox. Connect your Telegram MTProto credentials to upload files up to 2 GB for free!
                   </span>
                 )}
               </p>
@@ -119,20 +119,20 @@ export const StorageStatsBar: React.FC<StorageStatsBarProps> = ({
                 id="btn-stats-sync-channel"
                 onClick={onSyncTelegram}
                 disabled={isSyncing}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-colors shadow-xs disabled:opacity-50"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                 title="Restore folders and files from your Telegram channel"
               >
-                <RefreshCw className={`w-3.5 h-3.5 text-sky-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 text-sky-600 dark:text-sky-400 ${isSyncing ? 'animate-spin' : ''}`} />
                 <span>{isSyncing ? 'Syncing...' : 'Sync Channel'}</span>
               </button>
             )}
             <button
               id="btn-stats-configure"
               onClick={onOpenConfig}
-              className={`flex-1 sm:flex-initial px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold transition-colors shadow-sm text-center ${
+              className={`flex-1 sm:flex-initial px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold transition-colors shadow-sm text-center cursor-pointer ${
                 isLive
-                  ? 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
-                  : 'bg-sky-600 hover:bg-sky-700 text-white'
+                  ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                  : 'bg-sky-600 hover:bg-sky-500 text-white'
               }`}
             >
               {isLive ? 'Configure' : 'Connect Telegram'}
@@ -141,28 +141,28 @@ export const StorageStatsBar: React.FC<StorageStatsBarProps> = ({
         </div>
 
         {/* Quick Stats Grid */}
-        <div className="mt-4 pt-4 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-          <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60">
-            <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Stored on Telegram</div>
-            <div className="text-sm sm:text-base font-bold text-slate-900 mt-0.5 truncate">
+        <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Stored on Telegram</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5 truncate">
               {formatBytes(stats?.totalBytes || 0)}
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60">
-            <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Total Files</div>
-            <div className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Total Files</div>
+            <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">
               {stats?.totalFiles || 0}
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60">
-            <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Storage Quota</div>
-            <div className="text-sm sm:text-base font-bold text-emerald-600 mt-0.5">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Storage Quota</div>
+            <div className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
               Unlimited ($0/mo)
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60">
-            <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Max Single File</div>
-            <div className="text-sm sm:text-base font-bold text-sky-700 mt-0.5 truncate">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Max Single File</div>
+            <div className="text-sm sm:text-base font-bold text-sky-700 dark:text-sky-400 mt-0.5 truncate">
               {isLive && isMTProto ? '2 GB (MTProto)' : isLive ? '50 MB' : '2 GB (Sandbox)'}
             </div>
           </div>
@@ -178,10 +178,10 @@ export const StorageStatsBar: React.FC<StorageStatsBarProps> = ({
               key={cat.id}
               id={`filter-btn-${cat.id}`}
               onClick={() => onSelectCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 min-h-[38px] rounded-xl text-xs font-medium whitespace-nowrap transition-all touch-manipulation ${
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 min-h-[38px] rounded-xl text-xs font-medium whitespace-nowrap transition-all touch-manipulation cursor-pointer ${
                 isSelected
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/80 hover:border-slate-300'
+                  ? 'bg-slate-900 dark:bg-sky-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-800/90 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
               }`}
             >
               {cat.icon}

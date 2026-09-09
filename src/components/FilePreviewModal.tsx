@@ -67,26 +67,26 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   };
 
   return (
-    <div id="file-preview-modal-overlay" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75 backdrop-blur-sm p-2 sm:p-6 overflow-hidden">
-      <div id="file-preview-modal-card" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-5xl w-full h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div id="file-preview-modal-overlay" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/75 dark:bg-black/85 backdrop-blur-sm p-2 sm:p-6 overflow-hidden">
+      <div id="file-preview-modal-card" className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-5xl w-full h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Top Header */}
-        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0 gap-2">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-850 dark:bg-slate-900 shrink-0 gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 pr-1 sm:pr-4">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-200/80 flex items-center justify-center shrink-0">
-              {category === 'image' && <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />}
-              {category === 'video' && <Film className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />}
-              {category === 'audio' && <Music className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />}
-              {category === 'code' && <Code className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />}
-              {category === 'pdf' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-rose-600" />}
-              {category === 'document' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />}
-              {category === 'archive' && <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />}
-              {category === 'other' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />}
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-200/80 dark:bg-slate-800 flex items-center justify-center shrink-0">
+              {category === 'image' && <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />}
+              {category === 'video' && <Film className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400" />}
+              {category === 'audio' && <Music className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" />}
+              {category === 'code' && <Code className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />}
+              {category === 'pdf' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-rose-600 dark:text-rose-400" />}
+              {category === 'document' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />}
+              {category === 'archive' && <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700 dark:text-amber-400" />}
+              {category === 'other' && <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400" />}
             </div>
             <div className="min-w-0">
-              <h2 className="text-xs sm:text-base font-semibold text-slate-900 truncate" title={item.name}>
+              <h2 className="text-xs sm:text-base font-semibold text-slate-900 dark:text-white truncate" title={item.name}>
                 {item.name}
               </h2>
-              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
                 <span>{formatBytes(item.size)}</span>
                 <span>•</span>
                 <span>{formatDate(item.createdAt)}</span>
@@ -99,7 +99,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               id="btn-preview-download"
               href={downloadUrl}
               download={item.name}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-xs transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Download</span>
@@ -108,7 +108,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <button
               id="btn-preview-share"
               onClick={() => onShare(item)}
-              className="p-1.5 sm:p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Share File"
             >
               <Share2 className="w-4 h-4" />
@@ -117,7 +117,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <button
               id="btn-preview-delete"
               onClick={() => onDelete(item)}
-              className="p-1.5 sm:p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl border border-rose-200 dark:border-rose-900/70 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
               title="Delete File"
             >
               <Trash2 className="w-4 h-4" />
@@ -126,7 +126,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             <button
               id="btn-preview-close"
               onClick={onClose}
-              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors ml-0.5"
+              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors ml-0.5 cursor-pointer"
             >
               <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -154,7 +154,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-800 flex items-center gap-3 text-slate-300 text-xs shadow-xl">
                   <button
                     onClick={() => setZoom((z) => Math.max(25, z - 25))}
-                    className="hover:text-white p-1"
+                    className="hover:text-white p-1 cursor-pointer"
                     title="Zoom Out"
                   >
                     <ZoomOut className="w-4 h-4" />
@@ -162,7 +162,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                   <span className="font-mono text-[11px] w-10 text-center">{zoom}%</span>
                   <button
                     onClick={() => setZoom((z) => Math.min(300, z + 25))}
-                    className="hover:text-white p-1"
+                    className="hover:text-white p-1 cursor-pointer"
                     title="Zoom In"
                   >
                     <ZoomIn className="w-4 h-4" />
@@ -170,7 +170,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                   <div className="w-px h-3.5 bg-slate-700" />
                   <button
                     onClick={() => setRotation((r) => (r + 90) % 360)}
-                    className="hover:text-white p-1"
+                    className="hover:text-white p-1 cursor-pointer"
                     title="Rotate 90deg"
                   >
                     <RotateCw className="w-4 h-4" />
@@ -217,7 +217,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                         navigator.clipboard.writeText(textContent);
                       }
                     }}
-                    className="hover:text-white flex items-center gap-1 text-[11px]"
+                    className="hover:text-white flex items-center gap-1 text-[11px] cursor-pointer"
                   >
                     <Copy className="w-3 h-3" /> Copy Text
                   </button>
@@ -258,7 +258,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
                 <a
                   href={downloadUrl}
                   download={item.name}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold transition-colors"
                 >
                   <Download className="w-4 h-4" /> Download to view
                 </a>
@@ -267,19 +267,19 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           </div>
 
           {/* Metadata Inspector (Right Sidebar) */}
-          <div className="w-full md:w-80 bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 p-5 overflow-y-auto space-y-5 shrink-0">
+          <div className="w-full md:w-80 bg-slate-50 dark:bg-slate-900 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 p-5 overflow-y-auto space-y-5 shrink-0">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Telegram Cloud Metadata</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Permanent hosting attributes</p>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Telegram Cloud Metadata</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Permanent hosting attributes</p>
             </div>
 
             {/* Telegram Hosting Card */}
-            <div className="p-3.5 rounded-xl bg-sky-50/80 border border-sky-200/80 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-sky-950">
-                <Send className="w-3.5 h-3.5 text-sky-600 -rotate-12" />
+            <div className="p-3.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/50 border border-sky-200/80 dark:border-sky-800 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-sky-950 dark:text-sky-200">
+                <Send className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 -rotate-12" />
                 <span>Hosted on Telegram CDN</span>
               </div>
-              <p className="text-[11px] text-sky-800 leading-relaxed">
+              <p className="text-[11px] text-sky-800 dark:text-sky-300 leading-relaxed">
                 Stored permanently with zero expiration. Safe from server crashes or disk wipes.
               </p>
             </div>
@@ -287,32 +287,32 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
             {/* Technical Specifications */}
             <div className="space-y-3 text-xs">
               <div>
-                <span className="text-slate-400 block text-[11px] font-medium">File Name</span>
-                <span className="font-medium text-slate-800 break-all">{item.name}</span>
+                <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">File Name</span>
+                <span className="font-medium text-slate-800 dark:text-slate-200 break-all">{item.name}</span>
               </div>
 
               <div>
-                <span className="text-slate-400 block text-[11px] font-medium">Size</span>
-                <span className="font-semibold text-slate-800">{formatBytes(item.size)}</span>
+                <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">Size</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{formatBytes(item.size)}</span>
               </div>
 
               <div>
-                <span className="text-slate-400 block text-[11px] font-medium">MIME Type</span>
-                <span className="font-mono text-slate-700">{item.mimeType || 'application/octet-stream'}</span>
+                <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">MIME Type</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300">{item.mimeType || 'application/octet-stream'}</span>
               </div>
 
               <div>
-                <span className="text-slate-400 block text-[11px] font-medium">Uploaded At</span>
-                <span className="text-slate-700">{formatDate(item.createdAt)}</span>
+                <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">Uploaded At</span>
+                <span className="text-slate-700 dark:text-slate-300">{formatDate(item.createdAt)}</span>
               </div>
 
               {item.storageProtocol && (
                 <div>
-                  <span className="text-slate-400 block text-[11px] font-medium">Storage Protocol</span>
+                  <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">Storage Protocol</span>
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold mt-0.5 ${
                     item.storageProtocol === 'mtproto'
-                      ? 'bg-indigo-100 text-indigo-900 border border-indigo-200'
-                      : 'bg-sky-100 text-sky-900 border border-sky-200'
+                      ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-900 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+                      : 'bg-sky-100 dark:bg-sky-950/70 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
                   }`}>
                     {item.storageProtocol === 'mtproto' ? '⚡ MTProto (2 GB Limit)' : 'Telegram Bot API (50 MB)'}
                   </span>
@@ -322,16 +322,16 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               {item.telegramFileId && (
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 text-[11px] font-medium">Telegram File ID</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] font-medium">Telegram File ID</span>
                     <button
                       onClick={copyFileId}
-                      className="text-sky-600 hover:text-sky-700 flex items-center gap-1 text-[11px]"
+                      className="text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 text-[11px] cursor-pointer"
                     >
-                      {copiedFileId ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      {copiedFileId ? <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       <span>{copiedFileId ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
-                  <div className="mt-1 p-2 bg-white rounded-lg border border-slate-200 text-[10px] font-mono text-slate-600 break-all select-all">
+                  <div className="mt-1 p-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-[10px] font-mono text-slate-600 dark:text-slate-300 break-all select-all">
                     {item.telegramFileId}
                   </div>
                 </div>
@@ -339,23 +339,23 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
               {item.telegramMessageId && (
                 <div>
-                  <span className="text-slate-400 block text-[11px] font-medium">Telegram Message ID</span>
-                  <span className="font-mono text-slate-700">#{item.telegramMessageId}</span>
+                  <span className="text-slate-400 dark:text-slate-500 block text-[11px] font-medium">Telegram Message ID</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300">#{item.telegramMessageId}</span>
                 </div>
               )}
 
               {item.isDemo && (
-                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-300">
                   Uploaded in Demo/Sandbox mode.
                 </div>
               )}
             </div>
 
             {/* Quick Actions */}
-            <div className="pt-2 border-t border-slate-200 space-y-2">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
               <button
                 onClick={() => onShare(item)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors cursor-pointer"
               >
                 <Share2 className="w-3.5 h-3.5" />
                 <span>Get Shareable Link</span>
@@ -364,7 +364,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               <a
                 href={downloadUrl}
                 download={item.name}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-900 dark:bg-sky-600 hover:bg-slate-800 dark:hover:bg-sky-500 text-white text-xs font-semibold transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download File</span>
