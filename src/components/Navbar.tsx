@@ -2,6 +2,7 @@ import React from 'react';
 import { Cloud, Search, Settings, Upload, FolderPlus, Send, Sparkles, RefreshCw, Download } from 'lucide-react';
 import { TelegramConfig } from '../types';
 import { ThemeToggle } from './ThemeToggle';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 interface NavbarProps {
   searchQuery: string;
@@ -33,6 +34,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenInstallModal,
 }) => {
   const isLive = telegramConfig?.isConfigured && !telegramConfig?.isDemoMode;
+  const { isInstallable, isInstalled, install } = usePWAInstall();
+
+  const handleInstallClick = async () => {
+    if (onOpenInstallModal) onOpenInstallModal();
+    if (isInstallable) {
+      await install();
+    }
+  };
 
   return (
     <header id="main-navbar" className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -132,15 +141,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Install App Button */}
-          {onOpenInstallModal && (
+          {onOpenInstallModal && !isInstalled && (
             <button
               id="btn-navbar-install-app"
-              onClick={onOpenInstallModal}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-sky-500/15 to-indigo-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 border border-sky-300/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs font-semibold transition-all cursor-pointer"
-              title="Install TeleVault App for PC, Android, Mac & iPhone"
+              onClick={handleInstallClick}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-sky-500/15 to-indigo-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 border border-sky-300/40 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+              title="Direct Install TeleVault App for PC, Android, Mac & iPhone"
             >
-              <Download className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-              <span className="hidden sm:inline">Install App</span>
+              <Download className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 animate-bounce" />
+              <span className="hidden sm:inline">Direct Install</span>
             </button>
           )}
 

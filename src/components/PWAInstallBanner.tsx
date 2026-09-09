@@ -8,6 +8,7 @@ import {
   Sparkles,
   ChevronRight,
   ShieldCheck,
+  Zap,
 } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 
@@ -18,6 +19,7 @@ interface PWAInstallBannerProps {
 export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ onOpenInstallModal }) => {
   const { isInstallable, isInstalled, platform, install } = usePWAInstall();
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isPrompting, setIsPrompting] = useState(false);
 
   useEffect(() => {
     const dismissed = localStorage.getItem('televault_pwa_banner_dismissed');
@@ -36,10 +38,21 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ onOpenInstal
   };
 
   const getPlatformLabel = () => {
-    if (platform === 'android') return 'Android App';
-    if (platform === 'ios') return 'iPhone / iPad App';
-    if (platform === 'mac') return 'macOS App';
-    return 'PC / Desktop App';
+    if (platform === 'android') return 'Android';
+    if (platform === 'ios') return 'iPhone / iPad';
+    if (platform === 'mac') return 'Mac';
+    return 'PC & Windows';
+  };
+
+  const handleDirectInstallClick = async () => {
+    setIsPrompting(true);
+    // Open advertising modal first
+    onOpenInstallModal();
+    // Also trigger native prompt if available
+    if (isInstallable) {
+      await install();
+    }
+    setIsPrompting(false);
   };
 
   return (
@@ -57,28 +70,36 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ onOpenInstal
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-xs sm:text-sm tracking-tight">
-                Install TeleVault App for {getPlatformLabel()}
+                Install TeleVault Official App for {getPlatformLabel()}
               </span>
               <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
-                <Sparkles className="w-2.5 h-2.5" /> PWA Ready
+                <Sparkles className="w-2.5 h-2.5" /> PWA Standalone
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-sky-100 dark:text-sky-200 truncate">
-              Direct install for PC & Android • Guided setup for Mac & iPhone • Fast offline caching
+              Direct install on PC & Android • 2GB MTProto storage • Instant offline caching
             </p>
           </div>
         </div>
 
-        {/* Right Side: Action Buttons */}
+        {/* Right Side: Direct Install Button + Modal trigger */}
         <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
           <button
-            id="btn-banner-install-guide"
-            onClick={onOpenInstallModal}
+            id="btn-banner-direct-install"
+            onClick={handleDirectInstallClick}
             className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-bold text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Install / View Guide</span>
+            <Download className="w-3.5 h-3.5 text-sky-600" />
+            <span>Direct Install</span>
             <ChevronRight className="w-3 h-3 opacity-60" />
+          </button>
+
+          <button
+            id="btn-banner-view-guide"
+            onClick={onOpenInstallModal}
+            className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-semibold text-xs transition-colors cursor-pointer"
+          >
+            Guide & Features
           </button>
 
           <button
