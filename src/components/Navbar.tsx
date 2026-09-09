@@ -37,12 +37,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-900 tracking-tight text-sm sm:text-lg">TeleStorage</span>
+              <span className="font-bold text-slate-900 tracking-tight text-sm sm:text-lg">TeleVault</span>
               <span className="hidden md:inline-block px-2 py-0.5 text-[10px] font-semibold bg-sky-100 text-sky-800 rounded-full">
-                Free Hosting
+                Encrypted Vault
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 hidden lg:block">Unlimited Telegram Cloud Drive</p>
+            <p className="text-[11px] text-slate-500 hidden lg:block">Unlimited Telegram Cloud Storage</p>
           </div>
         </div>
 

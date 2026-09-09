@@ -24,6 +24,7 @@ import { MoveModal } from './components/MoveModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { UploadQueue } from './components/UploadQueue';
+import { StartupLoadingScreen } from './components/StartupLoadingScreen';
 import {
   StorageItem,
   TelegramConfig,
@@ -34,6 +35,10 @@ import {
 } from './types';
 
 export default function App() {
+  // Loading & Splash state
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isDataReady, setIsDataReady] = useState(false);
+
   // State
   const [items, setItems] = useState<StorageItem[]>([]);
   const [stats, setStats] = useState<StorageStats | null>(null);
@@ -139,10 +144,17 @@ export default function App() {
 
   // Initial load
   useEffect(() => {
-    fetchTelegramStatus();
-    fetchStats();
-    fetchAllFolders();
-  }, [fetchTelegramStatus, fetchStats, fetchAllFolders]);
+    const initApp = async () => {
+      await Promise.allSettled([
+        fetchTelegramStatus(),
+        fetchStats(),
+        fetchAllFolders(),
+        fetchItems(),
+      ]);
+      setIsDataReady(true);
+    };
+    initApp();
+  }, [fetchTelegramStatus, fetchStats, fetchAllFolders, fetchItems]);
 
   // Refresh items on changes
   useEffect(() => {
@@ -602,6 +614,14 @@ export default function App() {
         onClose={() => setShareItem(null)}
         item={shareItem}
       />
+
+      {/* Animated First-Launch Startup Loading Screen */}
+      {isInitialLoading && (
+        <StartupLoadingScreen
+          isDataReady={isDataReady}
+          onFinished={() => setIsInitialLoading(false)}
+        />
+      )}
     </div>
   );
 }
