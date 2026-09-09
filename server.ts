@@ -978,10 +978,10 @@ app.post('/api/files/upload', upload.single('file'), async (req, res) => {
         return res.json({ success: true, item: newItem, protocol: 'mtproto' });
       }
 
-      // --- STANDARD BOT API UPLOAD (50 MB LIMIT) ---
+      // --- STANDARD BOT API UPLOAD (50 MB PER-FILE LIMIT) ---
       if (file.size > 50 * 1024 * 1024) {
         throw new Error(
-          `File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds standard Bot API 50 MB limit. Switch to the MTProto protocol in settings to upload files up to 2 GB!`
+          `File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds the Bot API 50 MB per-file upload limit. Switch to the MTProto protocol in Settings to upload files up to 2 GB per file! (Note: Total channel storage space is unlimited).`
         );
       }
 
